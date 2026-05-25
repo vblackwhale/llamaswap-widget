@@ -1,7 +1,29 @@
 {
 	"name": "llamaswap-widget",
 	"version": "1.0.0",
+	"description": "React LlamaSwap widget for embedded wallet swap flows without iframes for Privy compatibility",
 	"private": false,
+	"keywords": [
+		"llamaswap",
+		"defillama",
+		"swap",
+		"dex",
+		"aggregator",
+		"widget",
+		"react",
+		"wagmi",
+		"viem",
+		"privy",
+		"embedded-wallet"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/LedgityYield/llamaswap-widget.git"
+	},
+	"bugs": {
+		"url": "https://github.com/LedgityYield/llamaswap-widget/issues"
+	},
+	"homepage": "https://github.com/LedgityYield/llamaswap-widget#readme",
 	"sideEffects": [
 		"src/styles.css"
 	],
