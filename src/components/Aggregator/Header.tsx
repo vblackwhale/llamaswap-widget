@@ -34,7 +34,7 @@ const Header = ({ children }) => {
 				cursor="pointer"
 			>
 				<Image
-					src={loaderImg.src}
+					src={loaderImg}
 					w={['28px', '28px', '36px', '36px']}
 					h={['28px', '28px', '36px', '36px']}
 					mr="8px"

@@ -1,5 +1,6 @@
 import { defineConfig, transformWithEsbuild } from 'vite';
 import react from '@vitejs/plugin-react';
+import inject from '@rollup/plugin-inject';
 import path from 'path';
 
 export default defineConfig({
@@ -20,6 +21,18 @@ export default defineConfig({
 			'~': path.resolve(__dirname, '../src')
 		},
 		dedupe: ['react', 'react-dom', 'wagmi', 'viem', '@tanstack/react-query', '@privy-io/react-auth', '@privy-io/wagmi']
+	},
+	optimizeDeps: {
+		include: ['buffer'],
+		esbuildOptions: {
+			target: 'esnext'
+		}
+	},
+	build: {
+		target: 'esnext',
+		rollupOptions: {
+			plugins: [inject({ Buffer: ['buffer', 'Buffer'] })]
+		}
 	},
 	server: {
 		host: '127.0.0.1',

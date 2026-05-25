@@ -1,4 +1,3 @@
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import styled from 'styled-components';
 import { HistoryModal } from '../HistoryModal';
 
@@ -11,12 +10,7 @@ const Wrapper = styled.div`
 `;
 
 const Connect = ({ tokenList = null, tokensUrlMap = {}, tokensSymbolsMap = {} }) => {
-	return (
-		<Wrapper>
-			<ConnectButton chainStatus={'none'} />
-			{tokenList ? <HistoryModal tokensUrlMap={tokensUrlMap} tokensSymbolsMap={tokensSymbolsMap} /> : null}
-		</Wrapper>
-	);
+	return <Wrapper>{tokenList ? <HistoryModal tokensUrlMap={tokensUrlMap} tokensSymbolsMap={tokensSymbolsMap} /> : null}</Wrapper>;
 };
 
 export default Connect;

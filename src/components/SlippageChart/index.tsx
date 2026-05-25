@@ -41,7 +41,7 @@ export default function SlippageChart({
 				type: 'image',
 				z: 0,
 				style: {
-					image: logo.src,
+					image: logo,
 					height: 40,
 					opacity: 0.3
 				},

@@ -50,8 +50,10 @@
 		"dev": "vite --config demo/vite.config.ts",
 		"dev:types": "tsc -p tsconfig.json --watch --preserveWatchOutput",
 		"prepack": "npm run build",
+		"prepublishOnly": "node scripts/bump-minor-on-new-commit.mjs && npm run build",
 		"prepare": "npm run build",
-		"typecheck": "tsc -p tsconfig.json --noEmit"
+		"typecheck": "tsc -p tsconfig.json --noEmit",
+		"version:minor-on-new-commit": "node scripts/bump-minor-on-new-commit.mjs"
 	},
 	"peerDependencies": {
 		"@tanstack/react-query": "^5.0.0",
@@ -77,10 +79,12 @@
 	"devDependencies": {
 		"@privy-io/react-auth": "3.13.1",
 		"@privy-io/wagmi": "4.0.1",
+		"@rollup/plugin-inject": "^5.0.5",
 		"@tanstack/react-query": "^5.0.0",
-		"@vitejs/plugin-react": "^5.0.0",
 		"@types/react": "^18.2.0",
 		"@types/styled-components": "^5.1.25",
+		"@vitejs/plugin-react": "^5.0.0",
+		"buffer": "^6.0.3",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"react-is": "^18.2.0",

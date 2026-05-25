@@ -1,3 +1,4 @@
+import './polyfills';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot } from 'react-dom/client';
 import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
@@ -35,16 +36,17 @@ const queryClient = new QueryClient({
 	}
 });
 
-const privyAppId = import.meta.env.VITE_PRIVY_APP_ID;
-const privyClientId = import.meta.env.VITE_PRIVY_CLIENT_ID;
-const walletConnectProjectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
+const env = (import.meta as any).env;
+const privyAppId = env.VITE_PRIVY_APP_ID;
+const privyClientId = env.VITE_PRIVY_CLIENT_ID;
+const walletConnectProjectId = env.VITE_WALLETCONNECT_PROJECT_ID;
 const hasPrivyConfig = Boolean(privyAppId && privyClientId);
 const widgetApiKeys = {
-	defillama: import.meta.env.VITE_LLAMASWAP_DEFILLAMA_API_KEY || undefined,
-	defillamaProxyUrl: import.meta.env.VITE_LLAMASWAP_PROXY_URL || undefined,
-	zeroX: import.meta.env.VITE_LLAMASWAP_ZEROX_API_KEY || undefined,
-	oneInch: import.meta.env.VITE_LLAMASWAP_ONEINCH_API_KEY || undefined,
-	hashflow: import.meta.env.VITE_LLAMASWAP_HASHFLOW_API_KEY || undefined
+	defillama: env.VITE_LLAMASWAP_DEFILLAMA_API_KEY || undefined,
+	defillamaProxyUrl: env.VITE_LLAMASWAP_PROXY_URL || undefined,
+	zeroX: env.VITE_LLAMASWAP_ZEROX_API_KEY || undefined,
+	oneInch: env.VITE_LLAMASWAP_ONEINCH_API_KEY || undefined,
+	hashflow: env.VITE_LLAMASWAP_HASHFLOW_API_KEY || undefined
 };
 
 const eth = {
@@ -131,8 +133,8 @@ function Demo() {
 					defaultFromToken={usdc}
 					defaultToToken={eth}
 					adapters={[createOdosAdapter()]}
-					defaultAmount="0.00001"
-					slippagePercent="0.05"
+					defaultAmount="0.1"
+					slippagePercent="0.1"
 					apiKeys={widgetApiKeys}
 					wallet={{
 						address: privyAddress,
