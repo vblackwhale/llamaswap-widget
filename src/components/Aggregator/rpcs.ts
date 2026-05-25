@@ -1,13 +1,15 @@
 import { ethers } from 'ethers';
 import { uniq } from 'lodash';
 
+const env = (globalThis as any).process?.env ?? {};
+
 function createProvider(name: string, defaultRpc: string, chainId: number, random = false) {
-	if (process.env.HISTORICAL) {
+	if (env.HISTORICAL) {
 		if (chainId === 1) {
 			console.log('RPC providers set to historical, only the first RPC provider will be used');
 		}
 		return new ethers.providers.StaticJsonRpcProvider(
-			(process.env[name.toUpperCase() + '_RPC'] ?? defaultRpc)?.split(',')[0],
+			(env[name.toUpperCase() + '_RPC'] ?? defaultRpc)?.split(',')[0],
 			{
 				name,
 				chainId
@@ -15,7 +17,7 @@ function createProvider(name: string, defaultRpc: string, chainId: number, rando
 		);
 	} else {
 		return new ethers.providers.FallbackProvider(
-			(process.env[name.toUpperCase() + '_RPC'] ?? defaultRpc).split(',').map((url, i) => ({
+			(env[name.toUpperCase() + '_RPC'] ?? defaultRpc).split(',').map((url, i) => ({
 				provider: new ethers.providers.StaticJsonRpcProvider(url, {
 					name,
 					chainId

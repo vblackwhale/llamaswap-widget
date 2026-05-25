@@ -43,7 +43,7 @@ export async function getQuote(chain: string, from: string, to: string, amount: 
 		}&skipValidation=true&feeRecipientTradeSurplus=${feeCollectorAddress}`,
 		{
 			headers: {
-				'0x-api-key': process.env.OX_API_KEY
+				'0x-api-key': extra?.apiKeys?.zeroX ?? extra?.apiKeys?.ox ?? ''
 			}
 		}
 	).then((r) => r.json());

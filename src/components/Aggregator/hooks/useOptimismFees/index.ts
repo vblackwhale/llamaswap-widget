@@ -7,6 +7,8 @@ const FEE_ADDRESS = '0x420000000000000000000000000000000000000F';
 export const chainsWithOpFees = ['optimism', 'base'];
 
 export const getOptimismFee = async (txData) => {
+	if (typeof window !== 'undefined') return 'Unknown';
+
 	const provider = providers.optimism;
 	const gasContract = new ethers.Contract(FEE_ADDRESS, FEE_ABI, provider);
 

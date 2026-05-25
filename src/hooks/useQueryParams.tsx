@@ -1,15 +1,16 @@
 import { ethers } from 'ethers';
-import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import { useAccount, useNetwork } from 'wagmi';
-import { getAllChains } from '~/components/Aggregator/router';
+import { useAccount, useChainId } from 'wagmi';
+import { getAllChains } from '../components/Aggregator/router';
+import { useWidgetRouter } from '../widget/WidgetRouter';
 
 const chains = getAllChains();
 
 export function useQueryParams() {
-	const router = useRouter();
+	const router = useWidgetRouter();
 	const { isConnected } = useAccount();
-	const { chain: chainOnWallet } = useNetwork();
+	const walletChainId = useChainId();
+	const chainOnWallet = walletChainId ? { id: walletChainId, unsupported: false } : null;
 
 	const { chain: chainOnURL, from: fromToken, to: toToken, ...query } = router.query;
 

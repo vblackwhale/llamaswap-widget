@@ -1,0 +1,9 @@
+LlamaSwap Widget
+
+This package is based on ideas and adapter behavior from the open-source
+bgd-labs/llamaswap-interface project, the interface behind LlamaSwap/DefiLlama
+Swap.
+
+The widget implementation in this package removes the original web app shell and
+wallet-provider ownership so it can run inside a host React application using
+that application's wagmi/Privy wallet context.

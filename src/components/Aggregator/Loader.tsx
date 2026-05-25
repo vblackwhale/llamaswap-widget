@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import loaderImg from '~/public/loader.png';
 
 const LoaderWrapper = styled.div`
 	margin: 0 auto;
@@ -41,7 +40,7 @@ const LoaderBody = styled.img`
 const Loader = (props) => {
 	return (
 		<LoaderWrapper {...props}>
-			<LoaderBody src={loaderImg.src} />
+			<LoaderBody src="https://swap.defillama.com/loader.png" />
 			<LoaderText>Loading...</LoaderText>
 		</LoaderWrapper>
 	);

@@ -6,15 +6,23 @@ export const redirectQuoteReq = async (
 	amount: string,
 	extra: any
 ) => {
-	const data = await fetch(
+	const apiKey = extra?.apiKeys?.defillama;
+	const proxyUrl = extra?.apiKeys?.defillamaProxyUrl;
+	const url =
+		proxyUrl ??
 		`https://swap-api.defillama.com/dexAggregatorQuote?protocol=${encodeURIComponent(
 			protocol
-		)}&chain=${chain}&from=${from}&to=${to}&amount=${amount}&api_key=nsr_UYWxuvj1hOCgHxJhDEKZ0g30c4Be3I5fOMBtFAA`,
-		{
-			method: 'POST',
-			body: JSON.stringify(extra)
-		}
-	).then((res) => res.json());
+		)}&chain=${chain}&from=${from}&to=${to}&amount=${amount}${apiKey ? `&api_key=${encodeURIComponent(apiKey)}` : ''}`;
+
+	const body = proxyUrl
+		? JSON.stringify({ protocol, chain, from, to, amount, extra })
+		: JSON.stringify(extra);
+
+	const data = await fetch(url, {
+		method: 'POST',
+		headers: { 'content-type': 'application/json' },
+		body
+	}).then((res) => res.json());
 
 	return data;
 };

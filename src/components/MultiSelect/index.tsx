@@ -9,12 +9,13 @@ interface IReactSelect extends Props {
 
 const formatOptionLabel = ({ label, ...rest }) => {
 	return (
-		<div style={{ display: 'flex' }}>
-			<div style={{color: '#ccc' }}>
+		<div style={{ display: 'flex', alignItems: 'center', minHeight: 20 }}>
+			<div style={{ color: '#ccc', display: 'flex', alignItems: 'center' }}>
 				{rest.logoURI ? (
 					<img
 						src={rest.logoURI}
 						style={{
+							display: 'block',
 							width: 20,
 							height: 20,
 							marginRight: 8,
@@ -27,7 +28,7 @@ const formatOptionLabel = ({ label, ...rest }) => {
 					<QuestionIcon height="20px" width="20px" marginRight={'8px'} />
 				)}
 			</div>
-			<div>{label}</div>
+			<div style={{ lineHeight: '20px' }}>{label}</div>
 		</div>
 	);
 };
@@ -45,6 +46,12 @@ const Wrapper = styled.span`
 			0px 0px 1px rgba(0, 0, 0, 0.04);
 		border-radius: 12px;
 	}
+
+	.react-select__control,
+	.react-select__control * {
+		cursor: pointer;
+	}
+
 	@media screen and (max-width: ${({ theme }) => theme.bpMed}) {
 		font-size: 16px;
 	}
@@ -55,17 +62,33 @@ const customStyles = {
 		...provided,
 		background: 'var(--background)',
 		padding: '4px 2px',
+		minHeight: 44,
 		borderRadius: '12px',
 		border: 'none',
 		color: 'var(--color)',
 		boxShadow:
 			'0px 24px 32px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 0px 1px rgba(0, 0, 0, 0.04)',
 		margin: 0,
-		zIndex: 0
+		zIndex: 0,
+		cursor: 'pointer'
+	}),
+	valueContainer: (provided) => ({
+		...provided,
+		display: 'flex',
+		alignItems: 'center',
+		paddingTop: 0,
+		paddingBottom: 0
 	}),
 	input: (provided) => ({
 		...provided,
-		color: 'var(--color)'
+		color: 'var(--color)',
+		margin: 0,
+		paddingTop: 0,
+		paddingBottom: 0
+	}),
+	indicatorsContainer: (provided) => ({
+		...provided,
+		alignItems: 'center'
 	}),
 	menu: (provided) => ({
 		...provided,
@@ -92,7 +115,9 @@ const customStyles = {
 	}),
 	singleValue: (provided, state) => ({
 		...provided,
-		color: 'var(--color)'
+		color: 'var(--color)',
+		display: 'flex',
+		alignItems: 'center'
 	})
 };
 
@@ -101,6 +126,7 @@ const height = 35;
 const ReactSelect = ({ options, style, ...props }: IReactSelect) => (
 	<Wrapper style={style}>
 		<Select
+			classNamePrefix="react-select"
 			styles={{ ...customStyles }}
 			options={options}
 			theme={(theme) => {

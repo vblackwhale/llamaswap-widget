@@ -1,9 +1,9 @@
 import { useQueries, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { partial, first, omit } from 'lodash';
 
-import { redirectQuoteReq } from '~/components/Aggregator/adapters/utils';
-import { chainsWithOpFees, getOptimismFee } from '~/components/Aggregator/hooks/useOptimismFees';
-import { adapters, adaptersWithApiKeys } from '~/components/Aggregator/list';
+import { redirectQuoteReq } from '../components/Aggregator/adapters/utils';
+import { chainsWithOpFees, getOptimismFee } from '../components/Aggregator/hooks/useOptimismFees';
+import { adapters, adaptersWithApiKeys } from '../components/Aggregator/list';
 
 interface IGetListRoutesProps {
 	chain: string;
@@ -45,6 +45,8 @@ interface IGetAdapterRouteProps extends IGetListRoutesProps {
 
 export const REFETCH_INTERVAL = 25_000;
 
+const canUseDefiLlamaProxy = (extra: any) => !!(extra?.apiKeys?.defillama || extra?.apiKeys?.defillamaProxyUrl);
+
 export async function getAdapterRoutes({ adapter, chain, from, to, amount, extra = {} }: IGetAdapterRouteProps) {
 	if (!chain || !from || !to || (!amount && !extra.amountOut) || (amount === '0' && extra.amountOut === '0')) {
 		return {
@@ -65,10 +67,8 @@ export async function getAdapterRoutes({ adapter, chain, from, to, amount, extra
 		let price;
 		let amountIn = amount;
 
-		const quouteFunc =
-			extra.isPrivacyEnabled || adaptersWithApiKeys[adapter.name]
-				? partial(redirectQuoteReq, adapter.name)
-				: adapter.getQuote;
+		const shouldProxyQuote = (extra.isPrivacyEnabled || adaptersWithApiKeys[adapter.name]) && canUseDefiLlamaProxy(extra);
+		const quouteFunc = shouldProxyQuote ? partial(redirectQuoteReq, adapter.name) : adapter.getQuote;
 		if (adapter.isOutputAvailable) {
 			price = await quouteFunc(chain, from, to, amount, extra);
 			amountIn = price.amountIn;
@@ -135,25 +135,29 @@ export function useGetRoutes({
 	disabledAdapters = [],
 	customRefetchInterval
 }: IGetListRoutesProps) {
+	const enabledAdapters = adapters.filter((adap) => {
+		if (adap.chainToId[chain] === undefined || disabledAdapters.includes(adap.name)) return false;
+		if (adaptersWithApiKeys[adap.name] && !canUseDefiLlamaProxy(extra)) return false;
+		return true;
+	});
+
 	const res = useQueries({
-		queries: adapters
-			.filter((adap) => adap.chainToId[chain] !== undefined && !disabledAdapters.includes(adap.name))
-			.map<UseQueryOptions<IRoute>>((adapter) => {
-				return {
-					queryKey: ['routes', adapter.name, chain, from, to, amount, JSON.stringify(omit(extra, 'amount'))],
-					queryFn: () => getAdapterRoutes({ adapter, chain, from, to, amount, extra }),
-					refetchInterval: customRefetchInterval || REFETCH_INTERVAL,
-					refetchOnWindowFocus: false,
-					refetchIntervalInBackground: false
-				};
-			})
+		queries: enabledAdapters.map<UseQueryOptions<IRoute>>((adapter) => {
+			return {
+				queryKey: ['routes', adapter.name, chain, from, to, amount, JSON.stringify(omit(extra, 'amount'))],
+				queryFn: () => getAdapterRoutes({ adapter, chain, from, to, amount, extra }),
+				refetchInterval: customRefetchInterval || REFETCH_INTERVAL,
+				refetchOnWindowFocus: false,
+				refetchIntervalInBackground: false
+			};
+		})
 	});
 	const data = res?.filter((r) => r.status === 'success') ?? [];
 	const resData = res?.filter((r) => r.status === 'success' && !!r.data && r.data.price) ?? [];
 	const loadingRoutes =
 		res
-			?.map((r, i) => [adapters[i].name, r])
-			?.filter((r: [string, UseQueryResult<IRoute>]) => r[1].status === 'loading') ?? [];
+			?.map((r, i) => [enabledAdapters[i].name, r])
+			?.filter((r) => (r[1] as UseQueryResult<IRoute>).status === 'pending') ?? [];
 
 	return {
 		isLoaded: loadingRoutes.length === 0,

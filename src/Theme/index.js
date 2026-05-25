@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ThemeProvider as StyledComponentsThemeProvider, createGlobalStyle } from 'styled-components';
-import { sm, med, lg, xl, twoXl } from '~/constants/breakpoints';
+import { sm, med, lg, xl, twoXl } from '../constants/breakpoints';
 
 export default function ThemeProvider({ children }) {
 	return <StyledComponentsThemeProvider theme={theme('dark')}>{children}</StyledComponentsThemeProvider>;
@@ -80,31 +80,15 @@ const theme = (mode = 'dark') => {
 }
 
 export const GlobalStyle = createGlobalStyle`
-	body, #__next {
+	body {
 		background-color: ${({ theme }) => theme.background};
 	}
 
-  #__next {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    min-height: 100%;
-    position: relative;
-    color: ${({ theme }) => theme.text1};
-    isolation: isolate;
-
-    ${({ theme: { minLg } }) => minLg} {
-      flex-direction: row;
-    }
-  }
-
-	#__next,
 	.chakra-modal__overlay,
 	.chakra-modal__content-container {
 		filter: ${({ theme }) => (theme.mode === 'light' ? 'invert(1) hue-rotate(180deg)' : undefined)};
 	}
 
-	#__next img,
 	.chakra-modal__content-container img,
 	button[data-testid=rk-connect-button] {
 		filter: ${({ theme }) => (theme.mode === 'light' ? 'invert(1) hue-rotate(180deg)' : undefined)};

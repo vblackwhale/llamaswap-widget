@@ -1,9 +1,10 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { ethers } from 'ethers';
 import { getAddress } from 'ethers/lib/utils';
-import { erc20ABI, useAccount, useBalance as useWagmiBalance } from 'wagmi';
-import { nativeAddress } from '~/components/Aggregator/constants';
-import { rpcUrls } from '~/components/Aggregator/rpcs';
+import { useAccount, useBalance as useWagmiBalance } from 'wagmi';
+import { erc20Abi } from 'viem';
+import { nativeAddress } from '../components/Aggregator/constants';
+import { rpcUrls } from '../components/Aggregator/rpcs';
 
 interface IGetBalance {
 	address?: string;
@@ -21,7 +22,7 @@ const createProviderAndGetBalance = async ({ rpcUrl, address, token }) => {
 			return { value: balance, formatted: ethers.utils.formatEther(balance) };
 		}
 
-		const contract = new ethers.Contract(getAddress(token), erc20ABI, provider);
+		const contract = new ethers.Contract(getAddress(token), erc20Abi, provider);
 
 		const [balance, decimals] = await Promise.all([contract.balanceOf(getAddress(address)), contract.decimals()]);
 
@@ -73,18 +74,18 @@ export const useBalance = ({
 		address: address,
 		token: tokenAddress,
 		chainId: chainId,
-		enabled: isEnabled,
-		staleTime: 10 * 1000
+		query: {
+			enabled: isEnabled,
+			staleTime: 10 * 1000
+		}
 	});
 
-	const queryData = useQuery(
-		['balance', address, chainId, token, wagmiData.isLoading || wagmiData.data ? false : true],
-		() => getBalance({ address, chainId, token }),
-		{
-			refetchInterval: 10_000,
-			enabled: isEnabled && !wagmiData.isLoading && !wagmiData.data
-		}
-	);
+	const queryData = useQuery({
+		queryKey: ['balance', address, chainId, token, wagmiData.isLoading || wagmiData.data ? false : true],
+		queryFn: () => getBalance({ address, chainId, token }),
+		refetchInterval: 10_000,
+		enabled: isEnabled && !wagmiData.isLoading && !wagmiData.data
+	});
 
 	// when token is undefined/null, wagmi tries fetch users chain token (for ex :ETH) balance, even though is isEnabled is false
 	// so hardcode data to null

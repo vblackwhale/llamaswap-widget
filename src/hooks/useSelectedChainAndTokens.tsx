@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { chainsMap } from '~/components/Aggregator/constants';
-import { getAllChains } from '~/components/Aggregator/router';
-import { IToken } from '~/types';
+import { chainsMap } from '../components/Aggregator/constants';
+import { getAllChains } from '../components/Aggregator/router';
+import { IToken } from '../types';
 import { useQueryParams } from './useQueryParams';
 
 const chains = getAllChains();

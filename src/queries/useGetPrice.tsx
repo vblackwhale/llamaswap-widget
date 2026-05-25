@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { chainGasToken, llamaToGeckoChainsMap } from '~/components/Aggregator/constants';
-import { providers } from '~/components/Aggregator/rpcs';
+import { providers } from '../components/Aggregator/rpcs';
 import { ethers } from 'ethers';
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
@@ -130,7 +129,9 @@ export async function getPrice({ chain: rawChain, fromToken, toToken }: IGetPric
 }
 
 export function useGetPrice({ chain, fromToken, toToken, skipRefetch }: IGetPriceProps) {
-	return useQuery<IPrice>(['gasPrice', chain, fromToken, toToken], () => getPrice({ chain, fromToken, toToken }), {
+	return useQuery<IPrice>({
+		queryKey: ['gasPrice', chain, fromToken, toToken],
+		queryFn: () => getPrice({ chain, fromToken, toToken }),
 		...(skipRefetch
 			? {
 					staleTime: 5 * 60 * 1000

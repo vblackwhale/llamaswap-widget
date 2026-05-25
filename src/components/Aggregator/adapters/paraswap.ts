@@ -44,7 +44,13 @@ export async function getQuote(
 	const finalAmount = side === 'BUY' ? amountOut : amount;
 	const data = await fetch(
 		`https://apiv5.paraswap.io/prices/?srcToken=${tokenFrom}&destToken=${tokenTo}&amount=${finalAmount}&srcDecimals=${fromToken?.decimals}&destDecimals=${toToken?.decimals}&partner=${partner}&side=${side}&network=${chainToId[chain]}&excludeDEXS=ParaSwapPool,ParaSwapLimitOrders`
-	).then((r) => r.json());
+	).then(async (r) => {
+		const body = await r.json().catch(() => null);
+		if (!r.ok || !body?.priceRoute) {
+			throw new Error(body?.error || body?.message || `ParaSwap price request failed with ${r.status}`);
+		}
+		return body;
+	});
 
 	const dataSwap =
 		userAddress !== ethers.constants.AddressZero
@@ -66,14 +72,20 @@ export async function getQuote(
 					headers: {
 						'Content-Type': 'application/json'
 					}
-			  }).then((r) => r.json())
+			  }).then(async (r) => {
+					const body = await r.json().catch(() => null);
+					if (!r.ok || !body?.to || !body?.data) {
+						throw new Error(body?.error || body?.message || `ParaSwap transaction request failed with ${r.status}`);
+					}
+					return body;
+			  })
 			: null;
 
 	let gas = data.priceRoute.gasCost;
 
 	if (chain === 'optimism') gas = BigNumber(3.5).times(gas).toFixed(0, 1);
 
-	if (chain === 'arbitrum') {
+	if (chain === 'arbitrum' && dataSwap) {
 		gas = await applyArbitrumFees(dataSwap.to, dataSwap.data, gas);
 	}
 

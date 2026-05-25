@@ -1,82 +1,33 @@
-import * as React from 'react'
-import styled from 'styled-components'
-import { Tooltip as AriaTooltip, TooltipAnchor, useTooltipState } from 'ariakit/tooltip'
-import Link from 'next/link'
+import * as React from 'react';
+import { Tooltip as ChakraTooltip } from '@chakra-ui/react';
 
 interface ITooltip {
-	content: string | null | React.ReactNode
-	href?: string
-	shallow?: boolean
-	onClick?: (e: any) => any
-	style?: {}
-	children: React.ReactNode
-	as?: any
+	content: string | null | React.ReactNode;
+	href?: string;
+	onClick?: (e: any) => any;
+	style?: {};
+	children: React.ReactNode;
+	as?: any;
 }
 
-const TooltipPopver = styled(AriaTooltip)`
-	font-size: 0.85rem;
-	padding: 1rem;
-	color: hsl(0, 0%, 100%);
-	background: hsl(204, 3%, 12%);
-	border: 1px solid hsl(204, 3%, 32%);
-	border-radius: 8px;
-	filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 40%));
-	max-width: 228px;
-`
+export default function Tooltip({ content, href, onClick, children, ...props }: ITooltip) {
+	if (!content || content === '') return <span>{children}</span>;
 
-const TooltipAnchor2 = styled(TooltipAnchor)`
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	flex-shrink: 0;
-
-	a {
-		display: flex;
-	}
-`
-
-const Popover2 = styled(TooltipPopver)`
-	padding: 12px;
-`
-
-export default function Tooltip({ content, as, href, shallow, onClick, children, ...props }: ITooltip) {
-	const tooltip = useTooltipState()
-
-	if (!content || content === '') return <>{children}</>
-
-	const triggerProps = {
-		...(onClick && { onClick })
-	}
+	const body = href ? (
+		<a href={href} onClick={onClick}>
+			{children}
+		</a>
+	) : (
+		<span onClick={onClick}>{children}</span>
+	);
 
 	return (
-		<>
-			<TooltipAnchor state={tooltip} as={as || (href ? 'div' : 'button')} className="tooltip-trigger" {...triggerProps}>
-				{href ? (
-					<Link href={href} shallow={shallow} passHref>
-						<a>{children}</a>
-					</Link>
-				) : (
-					children
-				)}
-			</TooltipAnchor>
-			<TooltipPopver state={tooltip} {...props}>
-				{content}
-			</TooltipPopver>
-		</>
-	)
+		<ChakraTooltip label={content} {...props}>
+			{body}
+		</ChakraTooltip>
+	);
 }
 
-export function Tooltip2({ content, children, ...props }: ITooltip) {
-	const tooltip = useTooltipState()
-
-	if (!content || content === '') return <>{children}</>
-
-	return (
-		<>
-			<TooltipAnchor2 state={tooltip}>{children}</TooltipAnchor2>
-			<Popover2 state={tooltip} {...props}>
-				{content}
-			</Popover2>
-		</>
-	)
+export function Tooltip2(props: ITooltip) {
+	return <Tooltip {...props} />;
 }

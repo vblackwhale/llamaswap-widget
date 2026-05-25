@@ -1,10 +1,10 @@
 import styled from 'styled-components';
-import Tooltip from '~/components/Tooltip';
+import Tooltip from '../Tooltip';
 import { useTokenApprove } from '../Aggregator/hooks';
-import { Flex, Skeleton, Text } from '@chakra-ui/react';
+import { Box, Flex, Skeleton, Text } from '@chakra-ui/react';
 import { AlertCircle, Gift, Unlock, ZapOff } from 'react-feather';
 import { GasIcon } from '../Icons';
-import { formattedNum } from '~/utils';
+import { formattedNum } from '../../utils';
 
 interface IToken {
 	address: string;
@@ -95,25 +95,25 @@ const Route = ({
 		>
 			<RouteRow>
 				{inputAmount ? (
-					<Flex alignItems="baseline">
-						<Text fontSize={19} fontWeight={700} color={'#FAFAFA'}>
+					<Flex alignItems="center" lineHeight={1}>
+						<Text fontSize={19} fontWeight={700} color={'#FAFAFA'} lineHeight={1}>
 							{formattedNum(inputAmount)}{' '}
 						</Text>
-						<Text fontSize={19} fontWeight={600} marginLeft={'4px'} color={'#ccc'}>
+						<Text fontSize={19} fontWeight={600} marginLeft={'4px'} color={'#ccc'} lineHeight={1}>
 							{fromToken?.symbol}{' '}
 						</Text>
 					</Flex>
 				) : (
-					<Flex alignItems="baseline">
-						<Text fontSize={19} fontWeight={700} color={'#FAFAFA'}>
+					<Flex alignItems="center" lineHeight={1}>
+						<Text fontSize={19} fontWeight={700} color={'#FAFAFA'} lineHeight={1}>
 							{formattedNum(amount)}{' '}
 						</Text>
-						<Text fontSize={19} fontWeight={600} marginLeft={'4px'} color={'#ccc'}>
+						<Text fontSize={19} fontWeight={600} marginLeft={'4px'} color={'#ccc'} lineHeight={1}>
 							{toToken?.symbol}{' '}
 						</Text>
 					</Flex>
 				)}
-				<Text fontWeight={500} fontSize={16} color={'#FAFAFA'}>
+				<Text fontWeight={500} fontSize={16} color={'#FAFAFA'} lineHeight={1}>
 					<Flex as="span" alignItems="center" gap="8px">
 						{index === 0 ? (
 							<Text as="span" color="#059669" fontSize={14} fontWeight={700}>
@@ -141,9 +141,10 @@ const Route = ({
 						display="flex"
 						color="gray.400"
 						fontWeight={500}
+						fontSize="0.8125rem"
 						flexWrap={'wrap'}
 					>
-						{afterFees ? <Text whiteSpace={'nowrap'}>{`≈ ${afterFees} after fees`}</Text> : null}
+						{afterFees ? <Text whiteSpace={'nowrap'} lineHeight={1.1}>{`≈ ${afterFees} after gas fees`}</Text> : null}
 						{isGasNotKnown && !isFetchingGasPrice && !isGasless ? (
 							<Text
 								display="flex"
@@ -152,40 +153,55 @@ const Route = ({
 								color="#d97706"
 								className="inline-alert"
 								whiteSpace={'nowrap'}
+								lineHeight={1.1}
+								fontSize="0.8125rem"
 							>
 								<AlertCircle size="14" /> unknown gas fees
 							</Text>
 						) : afterFees ? null : null}
 					</Flex>
 				)}
-				<Text display="flex" columnGap="6px" color={'gray.400'} fontWeight={500} ml="auto">
-					<Text
+				<Box display="flex" columnGap="6px" color={'gray.400'} fontWeight={500} fontSize="0.8125rem" ml="auto">
+					<Box
 						display="flex"
 						alignItems="center"
 						gap="4px"
 						color="gray.400"
+						fontSize="0.8125rem"
 						flexDirection={['column', 'row', 'row', 'row']}
 						whiteSpace={'nowrap'}
 					>
-						{airdrop ? (
-							<Tooltip content="This project has no token and might airdrop one in the future">
-								<Gift size={14} color="#A0AEC0" />
-							</Tooltip>
-						) : null}
 						{name === 'CowSwap' ? (
 							<Tooltip content="Gas is taken from output amount">
-								<Text as="span" display="flex" alignItems="center" gap="4px" color="gray.400" fontWeight={500}>
+								<Text
+									as="span"
+									display="flex"
+									alignItems="center"
+									gap="4px"
+									color="gray.400"
+									fontWeight={500}
+									fontSize="0.8125rem"
+									lineHeight={1.1}
+								>
 									{isGasNotKnown ? null : <GasIcon />}
 									{txGas}
 								</Text>
 							</Tooltip>
 						) : (
-							<Text as="span" display="flex" alignItems="center" gap="4px" fontWeight={500}>
+							<Text
+								as="span"
+								display="flex"
+								alignItems="center"
+								gap="4px"
+								fontWeight={500}
+								fontSize="0.8125rem"
+								lineHeight={1.1}
+							>
 								{isGasNotKnown ? null : <GasIcon />}
 								{txGas}
 							</Text>
 						)}
-						<Text display="flex" gap="3px">
+						<Box display="flex" gap="3px">
 							via
 							{isApproved ? (
 								<Tooltip content="Token is approved for this aggregator.">
@@ -200,9 +216,9 @@ const Route = ({
 									<ZapOff size={14} color="#059669" />
 								</Tooltip>
 							) : null}
-						</Text>
-					</Text>
-				</Text>
+						</Box>
+					</Box>
+				</Box>
 			</RouteRow>
 		</RouteWrapper>
 	);
@@ -212,7 +228,7 @@ export const LoadingRoute = ({ name }: { name: string }) => {
 	return (
 		<RouteWrapper>
 			<RouteRow>
-				<Skeleton height="28.5px" w="full" colorScheme="dark" />
+				<Skeleton height="20px" w="full" colorScheme="dark" />
 			</RouteRow>
 
 			<RouteRow>
@@ -226,8 +242,8 @@ export const LoadingRoute = ({ name }: { name: string }) => {
 
 const RouteWrapper = styled.div<{ selected?: boolean; best?: boolean }>`
 	display: grid;
-	grid-row-gap: 4px;
-	margin-top: 16px;
+	grid-row-gap: 8px;
+	margin-top: 14px;
 	&.is-selected {
 		border-color: rgb(31 114 229);
 		background-color: rgb(3 11 23);
@@ -235,7 +251,7 @@ const RouteWrapper = styled.div<{ selected?: boolean; best?: boolean }>`
 
 	background-color: ${({ selected }) => (selected ? ' #161616;' : '#2d3039;')};
 	border: 1px solid #373944;
-	padding: 7px 15px 9px;
+	padding: 10px 24px;
 	border-radius: 8px;
 	cursor: pointer;
 

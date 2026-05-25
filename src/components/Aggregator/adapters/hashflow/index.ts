@@ -31,6 +31,11 @@ const routerAddress = {
 };
 
 export async function getQuote(chain: string, from: string, to: string, amount: string, extra) {
+	const apiKey = extra?.apiKeys?.hashflow;
+	if (!apiKey) {
+		throw new Error('Hashflow API key is required');
+	}
+
 	const amountParam =
 		extra.amountOut && extra.amountOut !== '0' ? { quoteTokenAmount: extra.amountOut } : { baseTokenAmount: amount };
 
@@ -47,7 +52,7 @@ export async function getQuote(chain: string, from: string, to: string, amount: 
 		}),
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: process.env.HASHFLOW_API_KEY
+			Authorization: apiKey
 		}
 	}).then((r) => r.json());
 	const gas = chain === 'optimism' ? BigNumber(3.5).times(data.gasEstimate).toFixed(0, 1) : data.gasEstimate;

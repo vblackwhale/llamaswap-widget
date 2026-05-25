@@ -1,9 +1,8 @@
 import { useQueries, UseQueryOptions } from '@tanstack/react-query';
-import BigNumber from 'bignumber.js';
 import { ethers } from 'ethers';
 import { last } from 'lodash';
-import { erc20ABI } from 'wagmi';
-import { IRoute } from '~/queries/useGetRoutes';
+import { erc20Abi } from 'viem';
+import { IRoute } from '../../../queries/useGetRoutes';
 import { providers } from '../rpcs';
 
 const traceRpcs = {
@@ -19,11 +18,11 @@ const traceRpcs = {
 };
 
 export const estimateGas = async ({ route, token, userAddress, chain, balance }) => {
-	if (!Number.isFinite(balance) || balance < +route.fromAmount) return null;
+	if (balance === null || balance < BigInt(route.fromAmount || '0')) return null;
 
 	try {
 		const provider = new ethers.providers.StaticJsonRpcProvider(traceRpcs[chain], providers[chain]._network);
-		const tokenContract = new ethers.Contract(token, erc20ABI, provider);
+		const tokenContract = new ethers.Contract(token, erc20Abi, provider);
 		const tx = route?.tx;
 		const isNative = token === ethers.constants.AddressZero;
 		try {
@@ -45,7 +44,7 @@ export const estimateGas = async ({ route, token, userAddress, chain, balance })
 						from: userAddress,
 						to: txData.to,
 						data: txData.data,
-						...(isNative ? { value: '0x' + BigNumber(route.fromAmount).toString(16) } : {})
+						...(isNative ? { value: `0x${BigInt(route.fromAmount || '0').toString(16)}` } : {})
 					},
 					['trace']
 				]),
@@ -82,7 +81,7 @@ export const useEstimateGas = ({
 	token: string;
 	userAddress: string;
 	chain: string;
-	balance: number;
+	balance: bigint | null;
 	isOutput: boolean;
 }) => {
 	const res = useQueries({
@@ -90,7 +89,7 @@ export const useEstimateGas = ({
 			.filter((route) => !!route?.tx?.to)
 			.map<UseQueryOptions<Awaited<ReturnType<typeof estimateGas>>>>((route) => {
 				return {
-					queryKey: ['estimateGas', route.name, chain, route?.tx?.data, balance],
+					queryKey: ['estimateGas', route.name, chain, route?.tx?.data, balance?.toString() ?? null],
 					queryFn: () => estimateGas({ route, token, userAddress, chain, balance }),
 					enabled: traceRpcs[chain] !== undefined && (chain === 'polygon' && isOutput ? false : true) && !!userAddress // TODO: figure out why it doesn't work
 				};
@@ -102,7 +101,7 @@ export const useEstimateGas = ({
 			?.filter((r) => r.status === 'success' && !!r.data && r.data.gas)
 			.reduce((acc, r) => ({ ...acc, [r.data.name]: r.data }), {} as Record<string, EstimationRes>) ?? {};
 	return {
-		isLoading: res.some((r) => r.status === 'loading') || traceRpcs[chain] === undefined,
+		isLoading: res.some((r: any) => r.status === 'pending') || traceRpcs[chain] === undefined,
 		data
 	};
 };

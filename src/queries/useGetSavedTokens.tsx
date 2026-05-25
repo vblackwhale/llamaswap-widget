@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { getSavedTokens } from '~/utils';
+import { getSavedTokens } from '../utils';
 
 function fetchSavedTokens(chainId?: number | null) {
 	const savedTokens = getSavedTokens();

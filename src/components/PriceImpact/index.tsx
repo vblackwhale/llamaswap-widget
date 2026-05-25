@@ -87,17 +87,29 @@ export function PriceImpact({
 
 	return (
 		<>
-			<Accordion allowToggle style={{ margin: '0 4px' }} index={['lg', 'md'].includes(breakpoint) ? [0] : undefined}>
-				<AccordionItem borderColor="#373944" minH="2.5rem">
-					<AccordionButton onClick={() => setPriceOrder((prev) => prev * -1)}>
+			<Accordion allowToggle style={{ margin: '0' }} index={['lg', 'md'].includes(breakpoint) ? [0] : undefined}>
+				<AccordionItem borderTop="1px solid #373944" borderBottom="1px solid #373944" borderColor="#373944" py="0" color="white">
+					<AccordionButton
+						px="24px"
+						py="10px"
+						minH="42px"
+						border="0"
+						bg="transparent"
+						color="white"
+						cursor="pointer"
+						_hover={{ bg: 'transparent' }}
+						_focus={{ boxShadow: 'none' }}
+						_expanded={{ bg: 'transparent' }}
+						onClick={() => setPriceOrder((prev) => prev * -1)}
+					>
 						{priceOrder + shouldRevertPriceOrder === 1 ? (
-							<Box as="span" flex="1" textAlign="left" fontSize="0.875rem">{`1 ${
+							<Box as="span" flex="1" textAlign="left" fontSize="0.8125rem" fontWeight={500} lineHeight={1.2}>{`1 ${
 								fromToken.symbol
 							} = ${amountReceived.toFixed(4)} ${toToken.symbol} ($${(
 								Number(amountReceived) * Number(toTokenPrice)
 							).toFixed(2)})`}</Box>
 						) : (
-							<Box as="span" flex="1" textAlign="left" fontSize="0.875rem">{`1 ${
+							<Box as="span" flex="1" textAlign="left" fontSize="0.8125rem" fontWeight={500} lineHeight={1.2}>{`1 ${
 								toToken.symbol
 							} = ${toTokenValue.toFixed(4)} ${fromToken.symbol} ($${(
 								Number(toTokenValue) * Number(fromTokenPrice)
@@ -106,17 +118,19 @@ export function PriceImpact({
 					</AccordionButton>
 
 					<AccordionPanel
-						px={4}
-						py={[1, 1, 2, 2]}
-						mb={2}
+						px="26px"
+						py="12px"
+						mb="8px"
 						display={['none', 'none', 'flex', 'flex']}
 						flexDir="column"
-						gap={[0, 0, 2, 2]}
+						gap="10px"
 						border="1px solid #373944"
-						borderRadius="0.375rem"
-						fontSize="0.875rem"
+						borderRadius="8px"
+						color="white"
+						fontSize="0.8125rem"
+						lineHeight={1.2}
 					>
-						<Text display="flex" justifyContent="space-between" gap="8px" alignItems="center">
+						<Text display="flex" justifyContent="space-between" gap="8px" alignItems="center" color="white">
 							<span>Expected Output</span>
 							<span>{totalAmountReceived ? `${totalAmountReceived.toFixed(4)} ${toToken.symbol}` : '-'}</span>
 						</Text>
@@ -125,15 +139,7 @@ export function PriceImpact({
 							justifyContent="space-between"
 							gap="8px"
 							alignItems="center"
-							color={
-								isPriceImpactNotKnown
-									? 'red.500'
-									: selectedRoutesPriceImpact >= PRICE_IMPACT_WARNING_THRESHOLD
-									? 'orange.500'
-									: selectedRoutesPriceImpact >= PRICE_IMPACT_SMOL_WARNING_THRESHOLD
-									? 'yellow.500'
-									: 'white'
-							}
+							color="white"
 						>
 							<span>Price impact according to CoinGecko</span>
 
@@ -157,7 +163,7 @@ export function PriceImpact({
 							gap="8px"
 							alignItems="center"
 							borderTop="1px solid #373944"
-							paddingTop={2}
+							paddingTop="10px"
 							color={minimumReceived !== null && Number(minimumReceived) <= 0 ? 'red.500' : 'white'}
 						>
 							<span>{`Minimum received after slippage (${slippage}%)`}</span>

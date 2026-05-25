@@ -7,8 +7,9 @@ const PERCENT_SANDWICHED_TRADES = 5;
 
 export const getSandwichList = async () => {
 	try {
+		const apiKey = (globalThis as any).process?.env?.EIGEN_API_KEY ?? '';
 		const { data: sandwichData } = await fetch(
-			`https://public.api.eigenphi.io/?path=/ethereum/30d/sandwiched_pool&apikey=${process.env.EIGEN_API_KEY}`
+			`https://public.api.eigenphi.io/?path=/ethereum/30d/sandwiched_pool&apikey=${apiKey}`
 		).then((res) => res.json());
 
 		const [_, topTokens] = await getTopTokensByChain(1);

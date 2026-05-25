@@ -43,7 +43,7 @@ export async function getQuote(chain: string, from: string, to: string, amount: 
 		}&feeRecipient=${feeCollectorAddress}&feeSellTokenPercentage=0.0015`,
 		{
 			headers: {
-				'0x-api-key': process.env.OX_API_KEY,
+				'0x-api-key': extra?.apiKeys?.zeroX ?? extra?.apiKeys?.ox ?? '',
 				'0x-chain-id': chainToId[chain]
 			}
 		}
@@ -166,7 +166,7 @@ export async function swap({ signTypedDataAsync, rawQuote, chain, approvalData }
 	const res = await fetch(
 		`https://swap-api.defillama.com/submitSwap?protocol=${encodeURIComponent(
 			name
-		)}&chain=${chain}&api_key=nsr_UYWxuvj1hOCgHxJhDEKZ0g30c4Be3I5fOMBtFAA`,
+		)}&chain=${chain}`,
 		{
 			method: 'POST',
 			body: JSON.stringify(body)
@@ -178,7 +178,7 @@ export async function swap({ signTypedDataAsync, rawQuote, chain, approvalData }
 export async function submitSwap({ chain, body }) {
 	const tx = await fetch(`https://api.0x.org/tx-relay/v1/swap/submit`, {
 		headers: {
-			'0x-api-key': process.env.OX_API_KEY,
+			'0x-api-key': '',
 			'0x-chain-id': chainToId[chain],
 			'Content-Type': 'application/json'
 		},
@@ -208,7 +208,7 @@ export async function submitSwap({ chain, body }) {
 
 		gaslessTxReceipt = await fetch(`https://api.0x.org/tx-relay/v1/swap/status/${tx.tradeHash}`, {
 			headers: {
-				'0x-api-key': process.env.OX_API_KEY,
+				'0x-api-key': '',
 				'0x-chain-id': chainToId[chain]
 			}
 		}).then((res) => res.json());

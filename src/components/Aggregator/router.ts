@@ -14,13 +14,14 @@ export function getAllChains() {
 
 	const chainsOptions = allChains
 		.map((c) => {
-			const isVisible = chains.has(c.network);
+			const chain = c as any;
+			const isVisible = chains.has(chain.network);
 			if (!isVisible) return null;
 			return {
-				value: c.network,
-				label: chainNamesReplaced[c.network] ?? c.name,
-				chainId: c.id,
-				logoURI: c?.iconUrl
+				value: chain.network,
+				label: chainNamesReplaced[chain.network] ?? chain.name,
+				chainId: chain.id,
+				logoURI: chain?.iconUrl
 			};
 		})
 		.filter(Boolean);

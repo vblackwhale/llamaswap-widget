@@ -1,24 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
-import type { IToken } from '~/types';
+import type { LlamaSwapApiKeys } from '../widget/types';
 
 type Balances = Record<string, any>;
 
-function scramble(str: string) {
-	return str.split('').reduce((a, b) => {
-		return a + String.fromCharCode(b.charCodeAt(0) + 2);
-	}, '');
-}
-
-const getBalances = async (address, chain) => {
+const getBalances = async (address, chain, apiKeys?: LlamaSwapApiKeys) => {
 	if (!address || !chain) return [];
+	if (!apiKeys?.tokenBalancesUrl) return {};
 
-	const balances: any = await fetch(
-		`https://covalent-api.blastapi.io/${scramble(
-			'd51c17d5+3065+23a4+6c._+_1.6.`0a3137'
-		)}/v1/${chain}/address/${address}/balances_v2/`
-	).then((r) => r.json());
+	const url = new URL(apiKeys.tokenBalancesUrl);
+	url.searchParams.set('chainId', String(chain));
+	url.searchParams.set('address', address);
 
-	return balances.data.items.reduce((all: Balances, t: any) => {
+	const balances: any = await fetch(url.toString()).then((r) => r.json());
+	const items = Array.isArray(balances?.data?.items) ? balances.data.items : Array.isArray(balances?.items) ? balances.items : [];
+
+	return items.reduce((all: Balances, t: any) => {
 		const address =
 			t.contract_address === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
 				? '0x0000000000000000000000000000000000000000'
@@ -34,8 +30,12 @@ const getBalances = async (address, chain) => {
 	}, {} as Balances);
 };
 
-export const useTokenBalances = (address, chain) => {
-	return useQuery<Balances>(['balances', address, chain], () => getBalances(address, chain), {
+export const useTokenBalances = (address, chain, apiKeys?: LlamaSwapApiKeys) => {
+	return useQuery<Balances>({
+		queryKey: ['balances', address, chain, apiKeys?.tokenBalancesUrl],
+		queryFn: () => getBalances(address, chain, apiKeys),
+		enabled: !!address && !!chain && !!apiKeys?.tokenBalancesUrl,
+		initialData: {},
 		staleTime: 60 * 1000
 	});
 };
