@@ -131,17 +131,17 @@ The type watch script rebuilds `dist`, and the host Vite config should exclude
 `llamaswap-widget` from dependency prebundling so changes are picked up without
 a full page reload. Restart the host dev server once after changing Vite config.
 
-## Optional DefiLlama Proxy Adapter
+## API Keys And DefiLlama Proxy
 
-DefiLlama's own interface proxies some aggregator calls through
-`swap-api.defillama.com`. That path is useful for adapters that need API keys or
-server-side submission, but it should be treated as optional for this widget.
+The widget does not include or require a backend. API keys are passed directly
+through widget props and used by the browser-side adapters that need them. When
+privacy mode is enabled, quotes can optionally be routed through DefiLlama's
+hosted proxy at `swap-api.defillama.com`.
 
 ```tsx
 <LlamaSwapWidget
   apiKeys={{
     defillama: "defillama-api-key",
-    defillamaProxyUrl: "https://your-api.example.com/llamaswap",
     zeroX: "0x-api-key",
     oneInch: "1inch-api-key",
     hashflow: "hashflow-api-key",
@@ -149,9 +149,9 @@ server-side submission, but it should be treated as optional for this widget.
 />
 ```
 
-If neither `defillama` nor `defillamaProxyUrl` is provided, browser-unsafe
-routes such as Matcha/0x, 1inch, and 0x Gasless are skipped instead of throwing
-CORS errors. Direct browser-safe routes such as Odos still quote normally.
+`defillamaProxyUrl` is still available as an advanced override if you need to
+point privacy-mode quote requests at a compatible proxy, but the package no
+longer ships a server folder or serverless deployment.
 
 ## Environment
 
@@ -165,7 +165,6 @@ The widget itself does not read env variables. The local demo reads these
 optional adapter values and passes them into `<LlamaSwapWidget apiKeys={...}>`:
 
 - `VITE_LLAMASWAP_DEFILLAMA_API_KEY`
-- `VITE_LLAMASWAP_PROXY_URL`
 - `VITE_LLAMASWAP_ZEROX_API_KEY`
 - `VITE_LLAMASWAP_ONEINCH_API_KEY`
 - `VITE_LLAMASWAP_HASHFLOW_API_KEY`

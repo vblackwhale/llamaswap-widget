@@ -43,7 +43,6 @@ const walletConnectProjectId = env.VITE_WALLETCONNECT_PROJECT_ID;
 const hasPrivyConfig = Boolean(privyAppId && privyClientId);
 const widgetApiKeys = {
 	defillama: env.VITE_LLAMASWAP_DEFILLAMA_API_KEY || undefined,
-	defillamaProxyUrl: env.VITE_LLAMASWAP_PROXY_URL || undefined,
 	zeroX: env.VITE_LLAMASWAP_ZEROX_API_KEY || undefined,
 	oneInch: env.VITE_LLAMASWAP_ONEINCH_API_KEY || undefined,
 	hashflow: env.VITE_LLAMASWAP_HASHFLOW_API_KEY || undefined

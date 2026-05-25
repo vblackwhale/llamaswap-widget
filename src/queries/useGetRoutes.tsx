@@ -3,7 +3,7 @@ import { partial, first, omit } from 'lodash';
 
 import { redirectQuoteReq } from '../components/Aggregator/adapters/utils';
 import { chainsWithOpFees, getOptimismFee } from '../components/Aggregator/hooks/useOptimismFees';
-import { adapters, adaptersWithApiKeys } from '../components/Aggregator/list';
+import { adapters } from '../components/Aggregator/list';
 
 interface IGetListRoutesProps {
 	chain: string;
@@ -67,7 +67,7 @@ export async function getAdapterRoutes({ adapter, chain, from, to, amount, extra
 		let price;
 		let amountIn = amount;
 
-		const shouldProxyQuote = (extra.isPrivacyEnabled || adaptersWithApiKeys[adapter.name]) && canUseDefiLlamaProxy(extra);
+		const shouldProxyQuote = extra.isPrivacyEnabled && canUseDefiLlamaProxy(extra);
 		const quouteFunc = shouldProxyQuote ? partial(redirectQuoteReq, adapter.name) : adapter.getQuote;
 		if (adapter.isOutputAvailable) {
 			price = await quouteFunc(chain, from, to, amount, extra);
@@ -137,7 +137,6 @@ export function useGetRoutes({
 }: IGetListRoutesProps) {
 	const enabledAdapters = adapters.filter((adap) => {
 		if (adap.chainToId[chain] === undefined || disabledAdapters.includes(adap.name)) return false;
-		if (adaptersWithApiKeys[adap.name] && !canUseDefiLlamaProxy(extra)) return false;
 		return true;
 	});
 

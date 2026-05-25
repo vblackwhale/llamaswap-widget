@@ -88,7 +88,7 @@ export async function getQuote(chain: string, from: string, to: string, amount: 
 	return {
 		amountReturned: data.buyAmount,
 		amountIn: data.sellAmount,
-		rawQuote: data,
+		rawQuote: { ...data, apiKey: extra?.apiKeys?.zeroX ?? extra?.apiKeys?.ox },
 		estimatedGas: 0, // Currently swaps from ETH are not supported, so we don't handle gas costs for them
 		tokenApprovalAddress: data.allowanceTarget ?? null,
 		isGaslessApproval,
@@ -163,22 +163,13 @@ export async function swap({ signTypedDataAsync, rawQuote, chain, approvalData }
 		}
 	};
 
-	const res = await fetch(
-		`https://swap-api.defillama.com/submitSwap?protocol=${encodeURIComponent(
-			name
-		)}&chain=${chain}`,
-		{
-			method: 'POST',
-			body: JSON.stringify(body)
-		}
-	).then((res) => res.json());
-	return res;
+	return submitSwap({ chain, body, apiKey: rawQuote.apiKey });
 }
 
-export async function submitSwap({ chain, body }) {
+export async function submitSwap({ chain, body, apiKey }) {
 	const tx = await fetch(`https://api.0x.org/tx-relay/v1/swap/submit`, {
 		headers: {
-			'0x-api-key': '',
+			'0x-api-key': apiKey ?? '',
 			'0x-chain-id': chainToId[chain],
 			'Content-Type': 'application/json'
 		},
@@ -208,7 +199,7 @@ export async function submitSwap({ chain, body }) {
 
 		gaslessTxReceipt = await fetch(`https://api.0x.org/tx-relay/v1/swap/status/${tx.tradeHash}`, {
 			headers: {
-				'0x-api-key': '',
+				'0x-api-key': apiKey ?? '',
 				'0x-chain-id': chainToId[chain]
 			}
 		}).then((res) => res.json());
