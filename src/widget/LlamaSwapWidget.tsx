@@ -114,6 +114,8 @@ export function LlamaSwapWidget({
 									walletChainId={effectiveWalletChainId}
 									onConnect={effectiveOnConnect}
 									onSwitchChain={effectiveOnSwitchChain}
+									walletSendTransaction={wallet?.sendTransaction}
+									sponsorTransactions={wallet?.sponsorTransactions}
 									onChainChange={handleChainChange}
 									onSwapSubmitted={onSwapSubmitted}
 									onSwapConfirmed={onSwapConfirmed}

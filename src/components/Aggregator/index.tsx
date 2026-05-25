@@ -317,6 +317,8 @@ export function AggregatorContainer({
 	walletChainId: hostWalletChainId,
 	onConnect,
 	onSwitchChain,
+	walletSendTransaction,
+	sponsorTransactions,
 	onChainChange: onWidgetChainChange,
 	onSwapSubmitted,
 	onSwapConfirmed
@@ -332,12 +334,17 @@ export function AggregatorContainer({
 	walletChainId?: number;
 	onConnect?: () => void;
 	onSwitchChain?: (chainId: number) => void | Promise<void>;
+	walletSendTransaction?: (
+		input: { to?: Address; data?: `0x${string}`; value?: bigint | string; chainId?: number },
+		options?: { sponsor?: boolean }
+	) => Promise<{ hash: `0x${string}` }>;
+	sponsorTransactions?: boolean;
 	onChainChange?: (chainId: number) => void;
 	onSwapSubmitted?: (hash: string, quote: any) => void;
 	onSwapConfirmed?: (hash: string, quote: any) => void;
 }) {
 	// wallet stuff
-	const signer = useEthersSigner();
+	const signer = useEthersSigner({ sendTransaction: walletSendTransaction, sponsorTransactions });
 	const { address: wagmiAddress, isConnected: isWagmiConnected } = useAccount();
 	const wagmiChainId = useChainId();
 	const address = hostWalletAddress ?? wagmiAddress;
@@ -370,6 +377,7 @@ export function AggregatorContainer({
 	// post swap states
 	const [txModalOpen, setTxModalOpen] = useState(false);
 	const [txUrl, setTxUrl] = useState('');
+	const [verifiedRoutes, setVerifiedRoutes] = useState<Record<string, boolean>>({});
 	const confirmingTxToastRef = useRef<ToastId>();
 	const toast = useToast();
 
@@ -596,6 +604,45 @@ export function AggregatorContainer({
 				: b.netOut - a.netOut;
 		})
 		.map((route, i, arr) => ({ ...route, lossPercent: route.netOut / arr[0].netOut }));
+	const routeVerificationSignature = normalizedRoutes.map(getRouteVerificationKey).join('|');
+
+	useEffect(() => {
+		let cancelled = false;
+		const provider = signer?.provider;
+
+		if (!provider || !address || !normalizedRoutes?.length) {
+			setVerifiedRoutes({});
+			return;
+		}
+
+		Promise.all(
+			normalizedRoutes.map(async (route) => {
+				const routeKey = getRouteVerificationKey(route);
+				const tx = route.tx as { to?: string; data?: string; value?: string };
+
+				if (!tx?.to || !tx?.data || tx.data === '0x') return [routeKey, false] as const;
+
+				try {
+					await provider.call({
+						from: address,
+						to: tx.to,
+						data: tx.data,
+						value: tx.value ? ethers.BigNumber.from(tx.value) : undefined
+					});
+
+					return [routeKey, true] as const;
+				} catch {
+					return [routeKey, false] as const;
+				}
+			})
+		).then((results) => {
+			if (!cancelled) setVerifiedRoutes(Object.fromEntries(results));
+		});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [address, signer, routeVerificationSignature]);
 
 	const selecteRouteIndex =
 		aggregator && normalizedRoutes && normalizedRoutes.length > 0
@@ -1493,6 +1540,7 @@ export function AggregatorContainer({
 								amountOut={amountOutWithDecimals}
 								amountIn={r?.amountIn}
 								isGasless={r?.isGasless}
+								verified={verifiedRoutes[getRouteVerificationKey(r)] === true}
 							/>
 
 							{aggregator === r.name && (
@@ -1692,7 +1740,16 @@ export function AggregatorContainer({
 	);
 }
 
-function useEthersSigner() {
+function useEthersSigner({
+	sendTransaction,
+	sponsorTransactions
+}: {
+	sendTransaction?: (
+		input: { to?: Address; data?: `0x${string}`; value?: bigint | string; chainId?: number },
+		options?: { sponsor?: boolean }
+	) => Promise<{ hash: `0x${string}` }>;
+	sponsorTransactions?: boolean;
+}) {
 	const { data: walletClient } = useWalletClient();
 
 	return useMemo(() => {
@@ -1704,8 +1761,38 @@ function useEthersSigner() {
 			ensAddress: chain?.contracts?.ensRegistry?.address
 		};
 		const provider = new ethers.providers.Web3Provider(transport as any, network);
-		return provider.getSigner(account.address);
-	}, [walletClient]);
+		const signer = provider.getSigner(account.address);
+
+		if (!sendTransaction || !sponsorTransactions) return signer;
+
+		const sponsoredSigner = Object.create(signer) as ethers.Signer;
+		Object.assign(sponsoredSigner, signer);
+		sponsoredSigner.sendTransaction = async (tx) => {
+			const populatedTx = await signer.populateTransaction(tx);
+			const { hash } = await sendTransaction(
+				{
+					to: populatedTx.to as Address,
+					data: populatedTx.data as `0x${string}`,
+					value: populatedTx.value?.toString(),
+					chainId: chain?.id
+				},
+				{ sponsor: true }
+			);
+
+			return {
+				hash,
+				confirmations: 0,
+				from: account.address,
+				wait: (confirmations?: number) => provider.waitForTransaction(hash, confirmations)
+			} as ethers.providers.TransactionResponse;
+		};
+
+		return sponsoredSigner;
+	}, [sendTransaction, sponsorTransactions, walletClient]);
+}
+
+function getRouteVerificationKey(route: { name?: string; fromAmount?: string; tx?: { to?: string; data?: string } }) {
+	return [route?.name ?? '', route?.fromAmount ?? '', route?.tx?.to ?? '', route?.tx?.data ?? ''].join(':');
 }
 
 function useTokenData(_params: { address?: `0x${string}`; chainId?: number; enabled?: boolean }) {

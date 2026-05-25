@@ -75,7 +75,7 @@ export function InputAmountAndTokenSelect({
 			borderRadius="12px"
 			p={['8px', '8px', '16px', '16px']}
 			border="1px solid transparent"
-			_focusWithin={{ border: '1px solid white' }}
+			_focusWithin={{ border: '1px solid transparent' }}
 		>
 			<Text fontSize="0.875rem" fontWeight={400} color="#a2a2a2" whiteSpace="nowrap" minH="1.375rem">
 				{type === 'amountIn' ? 'You sell' : 'You buy'}
@@ -181,11 +181,15 @@ export function InputAmountAndTokenSelect({
 			</Flex>
 
 			{type === 'amountIn' ? (
-				<AmountPercentSlider percent={sliderPercent} onChange={setAmountPercent} disabled={!balanceAmount?.gt(0)} />
+				<Box mb="16px">
+					<AmountPercentSlider percent={sliderPercent} onChange={setAmountPercent} disabled={!balanceAmount?.gt(0)} />
+				</Box>
 			) : null}
 		</Flex>
 	);
 }
+
+const SLIDER_CORRECTION = 2.55;
 
 function AmountPercentSlider({
 	percent,
@@ -197,14 +201,15 @@ function AmountPercentSlider({
 	disabled?: boolean;
 }) {
 	const stops = [0, 25, 50, 75, 100];
+	const handleOffset = ((percent - 50) / 50) * SLIDER_CORRECTION;
 
 	return (
-		<Box pos="relative" h="28px" mt="2px" style={{ '--range-value': `${percent}%` } as React.CSSProperties}>
+		<Box pos="relative" h="30px" mt="2px" overflow="visible">
 			<Text
 				as="span"
 				pos="absolute"
 				top="-10px"
-				left={`calc(${percent}% - 10px)`}
+				left={`calc(${percent}% + ${handleOffset}% - 10px)`}
 				minW="32px"
 				px="6px"
 				py="2px"
@@ -228,6 +233,7 @@ function AmountPercentSlider({
 				onChange={(event) => onChange(Number(event.target.value))}
 				$percent={percent}
 			/>
+
 			{stops.map((stop) => (
 				<button
 					type="button"
@@ -256,10 +262,9 @@ function AmountPercentSlider({
 
 const RangeInput = styled.input<{ $percent: number }>`
 	position: absolute;
-	left: 0;
-	right: 0;
+	left: -${SLIDER_CORRECTION}%;
 	bottom: 0;
-	width: 100%;
+	width: ${100 + SLIDER_CORRECTION * 2}%;
 	height: 14px;
 	margin: 0;
 	background: transparent;
@@ -274,7 +279,8 @@ const RangeInput = styled.input<{ $percent: number }>`
 	&::-webkit-slider-runnable-track {
 		height: 4px;
 		border-radius: 999px;
-		background: ${({ $percent }) => `linear-gradient(to right, #1f72e5 0%, #1f72e5 ${$percent}%, #4a4d55 ${$percent}%, #4a4d55 100%)`};
+		background: ${({ $percent }) =>
+			`linear-gradient(to right, #1f72e5 0%, #1f72e5 ${$percent}%, #4a4d55 ${$percent}%, #4a4d55 100%)`};
 	}
 
 	&::-webkit-slider-thumb {
@@ -285,6 +291,7 @@ const RangeInput = styled.input<{ $percent: number }>`
 		border: 0;
 		border-radius: 999px;
 		background: #1f72e5;
+		z-index: 2;
 	}
 
 	&::-moz-range-track {
@@ -305,6 +312,7 @@ const RangeInput = styled.input<{ $percent: number }>`
 		border: 0;
 		border-radius: 999px;
 		background: #1f72e5;
+		z-index: 2;
 	}
 `;
 

@@ -79,6 +79,11 @@ export interface LlamaSwapWalletBridge {
 	chainId?: number;
 	connect?: () => void;
 	switchChain?: (chainId: number) => void | Promise<void>;
+	sponsorTransactions?: boolean;
+	sendTransaction?: (
+		input: { to?: Address; data?: Hex; value?: bigint | string; chainId?: number },
+		options?: { sponsor?: boolean }
+	) => Promise<{ hash: Hex }>;
 }
 
 export interface LlamaSwapWidgetProps {

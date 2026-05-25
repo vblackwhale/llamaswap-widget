@@ -1,9 +1,9 @@
 import './polyfills';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot } from 'react-dom/client';
-import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
+import { PrivyProvider, usePrivy, useSendTransaction, useWallets } from '@privy-io/react-auth';
 import { createConfig, useSetActiveWallet, WagmiProvider } from '@privy-io/wagmi';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { http, useAccount, useChainId, useSwitchChain } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { arbitrum, base, mainnet, optimism, polygon } from 'wagmi/chains';
@@ -100,6 +100,8 @@ function Demo() {
 	const { address: wagmiAddress } = useAccount();
 	const chainId = useChainId();
 	const { switchChainAsync } = useSwitchChain();
+	const { sendTransaction } = useSendTransaction();
+	const [sponsorTransactions, setSponsorTransactions] = useState(false);
 
 	const activeWallet = useMemo(() => {
 		const linkedAddresses = user?.linkedAccounts
@@ -128,6 +130,18 @@ function Demo() {
 				<PrivyWalletControls />
 			</header>
 
+			<section className="demo-panel demo-controls">
+				<label className="demo-toggle">
+					<input
+						type="checkbox"
+						checked={sponsorTransactions}
+						onChange={(event) => setSponsorTransactions(event.target.checked)}
+					/>
+					<span>Test gas sponsorship</span>
+				</label>
+				<p>Uses Privy sponsored embedded-wallet transactions when enabled.</p>
+			</section>
+
 			<section className="demo-grid">
 				<LlamaSwapWidget
 					defaultFromToken={usdc}
@@ -144,7 +158,9 @@ function Demo() {
 						switchChain: async (nextChainId) => {
 							await activeWallet?.switchChain(nextChainId);
 							await switchChainAsync({ chainId: nextChainId });
-						}
+						},
+						sponsorTransactions,
+						sendTransaction
 					}}
 					features={{
 						walletControls: true,

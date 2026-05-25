@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import Tooltip from '../Tooltip';
 import { useTokenApprove } from '../Aggregator/hooks';
 import { Box, Flex, Skeleton, Text } from '@chakra-ui/react';
-import { AlertCircle, Gift, Unlock, ZapOff } from 'react-feather';
+import { AlertCircle, CheckCircle, Gift, Unlock, ZapOff } from 'react-feather';
 import { GasIcon } from '../Icons';
 import { formattedNum } from '../../utils';
 
@@ -45,6 +45,7 @@ interface IRoute {
 	toTokenPrice: number;
 	amountIn: string;
 	isGasless: boolean;
+	verified?: boolean;
 }
 
 const Route = ({
@@ -65,7 +66,8 @@ const Route = ({
 	toTokenPrice,
 	amountIn,
 	selectedChain,
-	isGasless
+	isGasless,
+	verified
 }: IRoute) => {
 	const { isApproved } = useTokenApprove({
 		token: fromToken?.address as `0x${string}`,
@@ -115,6 +117,12 @@ const Route = ({
 				)}
 				<Text fontWeight={500} fontSize={16} color={'#FAFAFA'} lineHeight={1}>
 					<Flex as="span" alignItems="center" gap="8px">
+						{verified ? (
+							<VerifiedBadge as="span">
+								<CheckCircle size={10} />
+								Verified
+							</VerifiedBadge>
+						) : null}
 						{index === 0 ? (
 							<Text as="span" color="#059669" fontSize={14} fontWeight={700}>
 								BEST
@@ -305,6 +313,21 @@ const RouteRow = styled.div`
 			align-items: flex-end;
 		}
 	}
+`;
+
+const VerifiedBadge = styled.span`
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: 2px 6px;
+	border-radius: 4px;
+	background: rgba(100, 163, 125, 0.35);
+	color: #bbf7d0;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1;
+	text-transform: uppercase;
+	white-space: nowrap;
 `;
 
 export default Route;
