@@ -189,8 +189,6 @@ export function InputAmountAndTokenSelect({
 	);
 }
 
-const SLIDER_CORRECTION = 2.55;
-
 function AmountPercentSlider({
 	percent,
 	onChange,
@@ -201,29 +199,24 @@ function AmountPercentSlider({
 	disabled?: boolean;
 }) {
 	const stops = [0, 25, 50, 75, 100];
-	const handleOffset = ((percent - 50) / 50) * SLIDER_CORRECTION;
 
 	return (
-		<Box pos="relative" h="30px" mt="2px" overflow="visible">
-			<Text
-				as="span"
-				pos="absolute"
-				top="-10px"
-				left={`calc(${percent}% + ${handleOffset}% - 10px)`}
-				minW="32px"
-				px="6px"
-				py="2px"
-				textAlign="center"
-				fontSize="0.75rem"
-				fontWeight={600}
-				color="#fafafa"
-				bg="#2d3037"
-				borderRadius="6px"
-				pointerEvents="none"
-				zIndex={2}
-			>
-				{percent}%
-			</Text>
+		<SliderRoot $percent={percent} $disabled={!!disabled}>
+			<SliderValue>{percent}%</SliderValue>
+			<SliderTrack>
+				<SliderFill />
+				{stops.map((stop) => (
+					<SliderStopButton
+						type="button"
+						key={stop}
+						aria-label={`Set amount to ${stop}%`}
+						disabled={disabled}
+						onClick={() => onChange(stop)}
+						$stop={stop}
+					/>
+				))}
+				<SliderThumb />
+			</SliderTrack>
 			<RangeInput
 				type="range"
 				min="0"
@@ -231,88 +224,128 @@ function AmountPercentSlider({
 				value={percent}
 				disabled={disabled}
 				onChange={(event) => onChange(Number(event.target.value))}
-				$percent={percent}
 			/>
-
-			{stops.map((stop) => (
-				<button
-					type="button"
-					key={stop}
-					aria-label={`Set amount to ${stop}%`}
-					disabled={disabled}
-					onClick={() => onChange(stop)}
-					style={{
-						position: 'absolute',
-						left: `calc(${stop}% - 4px)`,
-						bottom: '3px',
-						width: '8px',
-						height: '8px',
-						padding: 0,
-						border: 0,
-						borderRadius: '999px',
-						background: '#4a4d55',
-						cursor: disabled ? 'not-allowed' : 'pointer',
-						opacity: disabled ? 0.55 : 1
-					}}
-				/>
-			))}
-		</Box>
+		</SliderRoot>
 	);
 }
 
-const RangeInput = styled.input<{ $percent: number }>`
+const SLIDER_THUMB_SIZE = '20px';
+
+const SliderRoot = styled.div<{ $percent: number; $disabled: boolean }>`
+	--slider-percent: ${({ $percent }) => $percent};
+	--slider-thumb-size: ${SLIDER_THUMB_SIZE};
+	position: relative;
+	height: 38px;
+	margin: 2px calc(var(--slider-thumb-size) / 2) 0;
+	opacity: ${({ $disabled }) => ($disabled ? 0.55 : 1)};
+`;
+
+const SliderTrack = styled.div`
 	position: absolute;
-	left: -${SLIDER_CORRECTION}%;
-	bottom: 0;
-	width: ${100 + SLIDER_CORRECTION * 2}%;
-	height: 14px;
+	left: 0;
+	right: 0;
+	bottom: 10px;
+	height: 4px;
+	border-radius: 999px;
+	background: #4a4d55;
+`;
+
+const SliderFill = styled.div`
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: calc(var(--slider-percent) * 1%);
+	border-radius: 999px;
+	background: #1f72e5;
+`;
+
+const SliderValue = styled.span`
+	position: absolute;
+	top: 0;
+	left: clamp(0px, calc(var(--slider-percent) * 1% - (var(--slider-thumb-size) / 2)), calc(100% - 32px));
+	min-width: 32px;
+	padding: 2px 6px;
+	transform: translate(6px, -2px);
+	border-radius: 6px;
+	background: #2d3037;
+	color: #fafafa;
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.15;
+	text-align: center;
+	pointer-events: none;
+	z-index: 2;
+`;
+
+const SliderThumb = styled.div`
+	position: absolute;
+	left: calc(var(--slider-percent) * 1% - (var(--slider-thumb-size) / 2));
+	top: 50%;
+	width: var(--slider-thumb-size);
+	height: var(--slider-thumb-size);
+	transform: translateY(-50%);
+	border-radius: 999px;
+	background: #1f72e5;
+	pointer-events: none;
+	z-index: 2;
+`;
+
+const SliderStopButton = styled.button<{ $stop: number }>`
+	position: absolute;
+	left: calc(${({ $stop }) => $stop}% - 4px);
+	top: 50%;
+	width: 8px;
+	height: 8px;
+	padding: 0;
+	transform: translateY(-50%);
+	border: 0;
+	border-radius: 999px;
+	background: #4a4d55;
+	cursor: pointer;
+	z-index: 3;
+
+	&:disabled {
+		cursor: not-allowed;
+	}
+`;
+
+const RangeInput = styled.input`
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
 	margin: 0;
 	background: transparent;
 	cursor: pointer;
 	appearance: none;
+	opacity: 0;
+	z-index: 4;
 
 	&:disabled {
 		cursor: not-allowed;
-		opacity: 0.55;
 	}
 
 	&::-webkit-slider-runnable-track {
-		height: 4px;
-		border-radius: 999px;
-		background: ${({ $percent }) =>
-			`linear-gradient(to right, #1f72e5 0%, #1f72e5 ${$percent}%, #4a4d55 ${$percent}%, #4a4d55 100%)`};
+		height: 100%;
 	}
 
 	&::-webkit-slider-thumb {
 		appearance: none;
-		width: 20px;
-		height: 20px;
-		margin-top: -8px;
+		width: var(--slider-thumb-size);
+		height: 100%;
+		margin-top: 0;
 		border: 0;
-		border-radius: 999px;
-		background: #1f72e5;
-		z-index: 2;
 	}
 
 	&::-moz-range-track {
-		height: 4px;
-		border-radius: 999px;
-		background: #4a4d55;
-	}
-
-	&::-moz-range-progress {
-		height: 4px;
-		border-radius: 999px;
-		background: #1f72e5;
+		height: 100%;
+		background: transparent;
 	}
 
 	&::-moz-range-thumb {
-		width: 20px;
-		height: 20px;
+		width: var(--slider-thumb-size);
+		height: 100%;
 		border: 0;
-		border-radius: 999px;
-		background: #1f72e5;
-		z-index: 2;
+		background: transparent;
 	}
 `;
 
