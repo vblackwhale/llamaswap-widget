@@ -1,6 +1,6 @@
 {
 	"name": "llamaswap-widget",
-	"version": "1.4.0",
+	"version": "1.5.0",
 	"description": "React LlamaSwap widget for embedded wallet swap flows without iframes for Privy compatibility",
 	"private": false,
 	"keywords": [
@@ -94,5 +94,5 @@
 		"vite": "^6.0.0",
 		"wagmi": "^2.0.0"
 	},
-	"x-version-commit": "c20359dd59faf874d9e11179eba18c454503aeab"
+	"x-version-commit": "2a1e492a7d333ba3f9c473f256b6cd6e2d7c8198"
 }
