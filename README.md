@@ -3,6 +3,8 @@
 Privy-compatible React swap widget inspired by the open-source LlamaSwap
 interface.
 
+![LlamaSwap Widget screenshot](public/llamaswap-screenshot.png)
+
 Credit: this project is based on ideas and adapter behavior from
 [`bgd-labs/llamaswap-interface`](https://github.com/bgd-labs/llamaswap-interface),
 the open-source interface behind LlamaSwap/DefiLlama Swap.
