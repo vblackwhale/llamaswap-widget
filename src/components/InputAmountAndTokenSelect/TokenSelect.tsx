@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import { useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { WarningTwoIcon } from '@chakra-ui/icons';
 import { Button, Flex, Input, Text, Tooltip } from '@chakra-ui/react';
@@ -23,7 +24,7 @@ const blockExplorersByChain = {
 const Overlay = styled.div`
 	position: fixed;
 	inset: 0;
-	z-index: 1500;
+	z-index: 2147483647;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -336,7 +337,7 @@ const SelectModal = ({ onClose, data, onClick, selectedChain }) => {
 		overscan: 10
 	});
 
-	return (
+	const modal = (
 		<Overlay onMouseDown={onClose}>
 			<Dialog
 				role="dialog"
@@ -435,6 +436,9 @@ const SelectModal = ({ onClose, data, onClick, selectedChain }) => {
 			</Dialog>
 		</Overlay>
 	);
+
+	if (typeof document === 'undefined') return null;
+	return createPortal(modal, document.body);
 };
 
 function findSuggestionToken(tokens, symbol: string) {

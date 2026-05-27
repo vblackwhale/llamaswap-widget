@@ -679,13 +679,20 @@ export function AggregatorContainer({
 	};
 	const onChainChange = (newChain) => {
 		setAggregator(null);
-		setAmount([defaultAmount, '']);
+		const nextTokens = tokenList?.[newChain.chainId] ?? [];
+		const nextFromToken = findMatchingTokenOnChain(nextTokens, finalSelectedFromToken, true);
+		const nextToToken = findMatchingTokenOnChain(nextTokens, finalSelectedToToken, false);
+		const nextToAddress =
+			nextToToken && nextFromToken?.address?.toLowerCase() !== nextToToken.address?.toLowerCase()
+				? nextToToken.address
+				: undefined;
+
 		onWidgetChainChange?.(newChain.chainId);
 		router
 			.push(
 				{
-					pathname: '/',
-					query: { ...router.query, chain: newChain.value, from: ethers.constants.AddressZero, to: undefined }
+					pathname: router.pathname,
+					query: { ...router.query, chain: newChain.value, from: nextFromToken?.address, to: nextToAddress }
 				},
 				undefined,
 				{ shallow: true }
@@ -699,6 +706,22 @@ export function AggregatorContainer({
 		router.push({ pathname: router.pathname, query: { ...router.query, from: token.address } }, undefined, {
 			shallow: true
 		});
+	};
+	const onSwitchTokens = () => {
+		const nextInputAmount =
+			selectedRoute?.amount && amount !== '' ? selectedRoute.amount : amountOut || normalizedRoutes[0]?.amount || '';
+		const nextOutputAmount = selectedRoute?.amountIn && amountOut !== '' ? selectedRoute.amountIn : amount || '';
+
+		setAggregator(null);
+		setAmount([nextInputAmount, nextOutputAmount]);
+		router.push(
+			{
+				pathname: router.pathname,
+				query: { ...router.query, to: finalSelectedFromToken?.address, from: finalSelectedToToken?.address }
+			},
+			undefined,
+			{ shallow: true }
+		);
 	};
 	const onToTokenChange = (token) => {
 		setAggregator(null);
@@ -1185,16 +1208,7 @@ export function AggregatorContainer({
 						/>
 
 						{features?.tokenSwitch !== false ? <IconButton
-							onClick={() =>
-								router.push(
-									{
-										pathname: router.pathname,
-										query: { ...router.query, to: finalSelectedFromToken?.address, from: finalSelectedToToken?.address }
-									},
-									undefined,
-									{ shallow: true }
-								)
-							}
+							onClick={onSwitchTokens}
 							icon={<ArrowDown size={14} />}
 							aria-label="Switch Tokens"
 							alignSelf="center"
@@ -1797,6 +1811,48 @@ function getRouteVerificationKey(route: { name?: string; fromAmount?: string; tx
 
 function useTokenData(_params: { address?: `0x${string}`; chainId?: number; enabled?: boolean }) {
 	return { data: null };
+}
+
+function findMatchingTokenOnChain(tokens: IToken[], currentToken?: IToken | null, fallbackToNative = false) {
+	const nativeToken = tokens.find((token) => token.address?.toLowerCase() === ethers.constants.AddressZero);
+	if (!currentToken) return fallbackToNative ? nativeToken : null;
+
+	if (currentToken.address?.toLowerCase() === ethers.constants.AddressZero) return nativeToken ?? null;
+
+	const currentSymbols = getEquivalentTokenSymbols(currentToken.symbol);
+	if (!currentSymbols.length) return fallbackToNative ? nativeToken : null;
+
+	const exactSymbolMatch = tokens.find((token) => token.symbol?.toUpperCase() === currentToken.symbol?.toUpperCase());
+	if (exactSymbolMatch) return exactSymbolMatch;
+
+	const normalizedSymbolMatch = tokens.find((token) =>
+		getEquivalentTokenSymbols(token.symbol).some((symbol) => currentSymbols.includes(symbol))
+	);
+	if (normalizedSymbolMatch) return normalizedSymbolMatch;
+
+	return fallbackToNative ? nativeToken : null;
+}
+
+const tokenSymbolAliases: Record<string, string[]> = {
+	USDCE: ['USDC'],
+	USDBC: ['USDC'],
+	AXLUSDC: ['USDC'],
+	USDT0: ['USDT'],
+	BTCB: ['WBTC', 'BTC'],
+	CBBTC: ['WBTC', 'BTC'],
+	TBTC: ['WBTC', 'BTC'],
+	WBTC: ['BTC'],
+	WETH: ['ETH']
+};
+
+function getEquivalentTokenSymbols(symbol?: string) {
+	const normalized = normalizeTokenSymbol(symbol);
+	if (!normalized) return [];
+	return [...new Set([normalized, ...(tokenSymbolAliases[normalized] ?? [])])];
+}
+
+function normalizeTokenSymbol(symbol?: string) {
+	return (symbol ?? '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 }
 
 function parseAmountToUnits(amount: string | undefined, decimals: number) {
