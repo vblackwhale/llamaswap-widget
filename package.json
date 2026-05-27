@@ -1,6 +1,6 @@
 {
 	"name": "llamaswap-widget",
-	"version": "1.3.0",
+	"version": "1.4.0",
 	"description": "React LlamaSwap widget for embedded wallet swap flows without iframes for Privy compatibility",
 	"private": false,
 	"keywords": [
@@ -18,12 +18,12 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/LedgityYield/llamaswap-widget.git"
+		"url": "git+https://github.com/vblackwhale/llamaswap-widget.git"
 	},
 	"bugs": {
-		"url": "https://github.com/LedgityYield/llamaswap-widget/issues"
+		"url": "https://github.com/vblackwhale/llamaswap-widget/issues"
 	},
-	"homepage": "https://github.com/LedgityYield/llamaswap-widget#readme",
+	"homepage": "https://github.com/vblackwhale/llamaswap-widget#readme",
 	"sideEffects": [
 		"src/styles.css"
 	],
@@ -41,6 +41,7 @@
 	},
 	"files": [
 		"dist",
+		"public/llamaswap-screenshot.png",
 		"src/styles.css",
 		"README.md",
 		"NOTICE"
@@ -93,5 +94,5 @@
 		"vite": "^6.0.0",
 		"wagmi": "^2.0.0"
 	},
-	"x-version-commit": "b91dc4f7127884bb8246fe170f83ec21857d1b1e"
+	"x-version-commit": "c20359dd59faf874d9e11179eba18c454503aeab"
 }
