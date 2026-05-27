@@ -470,7 +470,15 @@ export function AggregatorContainer({
 		chainId: selectedChain?.id,
 		query: { enabled: selectedChain ? true : false }
 	});
-	const gasPriceData = { formatted: { gasPrice: gasPrice?.toString() ?? '0' } };
+	const { data: tokenPrices, isLoading: fetchingTokenPrices } = useGetPrice({
+		chain: selectedChain?.value,
+		toToken: finalSelectedToToken?.address,
+		fromToken: finalSelectedFromToken?.address
+	});
+	const { gasTokenPrice = 0, toTokenPrice, fromTokenPrice } = tokenPrices || {};
+	const gasPriceData = {
+		formatted: { gasPrice: gasPrice?.toString() ?? getGasPriceFromFeeData(tokenPrices?.gasPriceData) ?? '0' }
+	};
 
 	const tokensInChain = useMemo(() => {
 		return (
@@ -534,13 +542,6 @@ export function AggregatorContainer({
 		balance: balance?.data?.value ? BigInt(balance.data.value.toString()) : null,
 		isOutput: amountOut && amountOut !== ''
 	});
-	const { data: tokenPrices, isLoading: fetchingTokenPrices } = useGetPrice({
-		chain: selectedChain?.value,
-		toToken: finalSelectedToToken?.address,
-		fromToken: finalSelectedFromToken?.address
-	});
-	const { gasTokenPrice = 0, toTokenPrice, fromTokenPrice } = tokenPrices || {};
-
 	// format routes
 	const fillRoute = (route: typeof routes[0]) => {
 		if (!route?.price) return null;
@@ -1893,6 +1894,12 @@ function toNumber(value: unknown) {
 	if (value && typeof (value as any).toNumber === 'function') return (value as any).toNumber();
 	if (value && typeof (value as any).toString === 'function') return Number((value as any).toString());
 	return Number(value ?? 0);
+}
+
+function getGasPriceFromFeeData(feeData: any) {
+	const gasPrice = feeData?.gasPrice ?? feeData?.maxFeePerGas;
+	if (!gasPrice) return null;
+	return gasPrice.toString();
 }
 
 function getExplorerUrl(chainId?: number) {

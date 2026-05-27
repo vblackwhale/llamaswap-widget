@@ -111,10 +111,14 @@ export async function getPrice({ chain: rawChain, fromToken, toToken }: IGetPric
 		}
 		const chain = convertChain(rawChain);
 
-		const [{ gasTokenPrice, fromTokenPrice, toTokenPrice }, gasPriceData] = await Promise.all([
-			getCoinsPrice({ chain: rawChain, fromToken, toToken }),
-			providers[chain].getFeeData()
-		]);
+		const { gasTokenPrice, fromTokenPrice, toTokenPrice } = await getCoinsPrice({ chain: rawChain, fromToken, toToken });
+		let gasPriceData = null;
+
+		try {
+			gasPriceData = await providers[chain]?.getFeeData?.();
+		} catch (error) {
+			console.log(error);
+		}
 
 		return {
 			gasTokenPrice,
